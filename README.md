@@ -1,5 +1,7 @@
 # Hybrid Autonomous Navigation, Mapping, and Manual Override Vehicle
 
+🚀 **Live Web Command Center:** [autonomous-vehicle-mapping-and-tele-seven.vercel.app](https://autonomous-vehicle-mapping-and-tele-seven.vercel.app/)
+
 ## Project Overview
 
 The Hybrid Autonomous Navigation, Mapping, and Manual Override Vehicle is a robotics and embedded systems project focused on developing an intelligent mobile platform capable of autonomous navigation, environmental perception, digital mapping, obstacle avoidance, and user-controlled operation. The project combines hardware design, embedded software development, real-time sensor processing, mechanical design, wireless communication, and autonomous decision-making into a unified robotic system.
@@ -122,14 +124,19 @@ These coordinates are rounded to the nearest integer and added to a de-duplicate
 
 # How to Use the Dashboard
 
-## 1. Quick Launch (Offline Simulator Mode)
-If you want to evaluate the dashboard layout, map rendering, and manual override controls without a physical Arduino:
+## 1. Live Deployment Launch (Recommended / Easiest)
+The simplest way to run and connect to the dashboard without installing any dependencies or terminal commands:
+1. Open **[autonomous-vehicle-mapping-and-tele-seven.vercel.app](https://autonomous-vehicle-mapping-and-tele-seven.vercel.app/)** in Google Chrome, Microsoft Edge, or Opera.
+2. The dashboard runs directly in your browser. Since it is hosted securely under HTTPS, the **Web Serial API is fully enabled** and ready to connect to your Arduino out of the box.
+
+## 2. Quick Launch (Offline Simulator Mode)
+If you want to evaluate the dashboard layout, map rendering, and manual override controls offline:
 1. Double-click on **[index.html](file:///c:/Users/User/-autonomous-vehicle-mapping-and-telemetry-system/dashboard/index.html)** in your file explorer.
 2. The page will open directly in your web browser. 
-3. The dashboard defaults to **Simulation Mode**, running a 2D raycasting engine inside a virtual box arena with obstacles. The path history (green line), robot (blue triangle), and obstacles (red markers) will render and update dynamically.
+3. The dashboard defaults to **Simulation Mode**, running a 2D raycasting engine inside a virtual box arena with obstacles. Note: Browsers block Web Serial access on local `file://` URLs, so physical connection is disabled in this mode.
 
-## 2. Secure Local Server Launch (Required for Physical Arduino Connection)
-To query physical serial ports using the **Web Serial API**, web browsers enforce a secure origin policy. The page must be served from `http://localhost`:
+## 3. Secure Local Server Launch (Alternative Developer Mode)
+If you want to run the application locally while maintaining Web Serial connection capability:
 1. Open a command prompt or terminal.
 2. Navigate to the dashboard directory:
    ```bash
@@ -140,9 +147,9 @@ To query physical serial ports using the **Web Serial API**, web browsers enforc
    npx serve .
    ```
    *(If script execution permissions are restricted on Windows, use `cmd /c "set PATH=C:\Program Files\nodejs;%PATH% && npx serve -l 3030 ."`)*
-4. Open your web browser and navigate to **[http://localhost:3030](http://localhost:3030)** (or the port indicated in your console).
+4. Open your web browser and navigate to **[http://localhost:3030](http://localhost:3030)**.
 
-## 3. Connecting to the Vehicle
+## 4. Connecting to the Vehicle
 1. Unplug the TX and RX pins of any Bluetooth module (like HC-05) from pins 0 and 1 on your Arduino (these conflict with the USB connection).
 2. Toggle the **SIMULATOR** switch in the top bar of the dashboard to **OFF**.
 3. Choose the **Baud Rate** corresponding to your code (default is 9600).
