@@ -1369,6 +1369,9 @@ function toggleManualOverride() {
         
         logSystemEvent("Manual Override Mode ACTIVE. Keyboard controls enabled.");
         addTimelineEvent("MANUAL", "Manual Override Mode Activated", "state-active");
+        
+        // Notify physical Arduino to enter manual override state
+        sendSerialCommand('CTRL,MANUAL');
     } else {
         statusText.textContent = "INACTIVE";
         statusText.className = "override-status inactive";
@@ -1377,7 +1380,7 @@ function toggleManualOverride() {
         btnIcon.setAttribute('data-lucide', 'toggle-left');
         
         logSystemEvent("Manual Override Mode DEACTIVATED. Returning to autonomous mode.");
-        sendManualCommand('DIR,STOP');
+        sendSerialCommand('CTRL,AUTO'); // Notify physical Arduino to return to autonomous routing
         addTimelineEvent("AUTO", "Returned to Autonomous Steering", "state-active");
     }
     
