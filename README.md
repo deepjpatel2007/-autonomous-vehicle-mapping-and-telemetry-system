@@ -1,18 +1,16 @@
-# Hybrid Autonomous Navigation, Mapping, and Manual Override Vehicle
+# Autonomous Vehicle Mapping and Telemetry System
 
 🚀 **Live Web Command Center:** [autonomous-vehicle-mapping-and-tele-seven.vercel.app](https://autonomous-vehicle-mapping-and-tele-seven.vercel.app/)
 
 ## Project Overview
 
-The Hybrid Autonomous Navigation, Mapping, and Manual Override Vehicle is a robotics and embedded systems project focused on developing an intelligent mobile platform capable of autonomous navigation, environmental perception, digital mapping, obstacle avoidance, and user-controlled operation. The project combines hardware design, embedded software development, real-time sensor processing, mechanical design, wireless communication, and autonomous decision-making into a unified robotic system.
+The Autonomous Vehicle Mapping and Telemetry System is a robotics and embedded systems project focused on developing an intelligent mobile platform capable of autonomous navigation, environmental perception, digital mapping, obstacle avoidance, and real-time telemetry visualization. The project combines hardware design, embedded software development, real-time sensor processing, mechanical design, motor control, serial communication, and web-based data visualization into a unified robotic system.
 
 The primary goal of the project is to develop a vehicle capable of exploring an unknown environment while continuously collecting information about its surroundings. Through the use of ultrasonic sensing, servo-assisted environmental scanning, motor control systems, and digital mapping algorithms, the vehicle is able to identify obstacles, determine safe routes, and build a digital representation of the environment as it navigates.
 
 Unlike traditional obstacle-avoidance robots that simply react to nearby objects, this project is designed around the concept of environmental awareness. The vehicle continuously observes and records information about its surroundings to create a simplified digital map similar to the occupancy mapping systems used in robotic vacuum cleaners and autonomous mobile robots. This allows the vehicle to move beyond simple reactive behavior and toward intelligent navigation.
 
-In addition to autonomous operation, the system incorporates a manual override mode through Bluetooth communication. This allows users to directly control the vehicle while still benefiting from the environmental sensing and mapping capabilities of the platform. The result is a hybrid navigation system that combines autonomous decision-making with human-guided exploration.
-
-The project serves as a practical demonstration of robotics engineering, embedded systems development, software architecture, control systems, sensor integration, and intelligent autonomous behavior.
+The project serves as a practical demonstration of robotics engineering, embedded systems development, software architecture, control systems, sensor integration, telemetry processing, and intelligent autonomous behavior.
 
 ---
 
@@ -20,7 +18,7 @@ The project serves as a practical demonstration of robotics engineering, embedde
 
 Autonomous navigation represents one of the most important challenges in robotics. Modern autonomous systems must be capable of perceiving their environment, identifying obstacles, determining safe paths, and adapting to changing conditions in real time. Achieving this requires the integration of sensors, software, hardware, and control algorithms into a cohesive system capable of making intelligent decisions.
 
-The motivation behind this project was to gain hands-on experience with the technologies and engineering principles that power autonomous systems. While many beginner robotics projects focus solely on motor control or simple obstacle avoidance, this project aims to investigate the broader concepts involved in autonomous mobility, including environmental mapping, perception, navigation, and hybrid human-machine control.
+The motivation behind this project was to gain hands-on experience with the technologies and engineering principles that power autonomous systems. While many beginner robotics projects focus solely on motor control or simple obstacle avoidance, this project aims to investigate the broader concepts involved in autonomous mobility, including environmental mapping, perception, navigation, telemetry processing, and autonomous decision-making.
 
 By designing and building the system from the ground up, the project provides valuable experience in embedded programming, electronics, mechanical design, prototyping, debugging, system integration, and software engineering. It also serves as a foundation for future exploration into more advanced robotics concepts such as localization, simultaneous localization and mapping (SLAM), computer vision, and machine learning-assisted navigation.
 
@@ -30,7 +28,7 @@ By designing and building the system from the ground up, the project provides va
 
 A robotic system operating in an unfamiliar environment must be capable of identifying obstacles, selecting safe routes, and maintaining awareness of its surroundings. Many low-cost robotic systems rely solely on simple obstacle avoidance, which limits their ability to understand the environment or make informed navigation decisions.
 
-This project addresses that limitation by developing a robotic vehicle capable of collecting environmental information while navigating. The vehicle must be able to operate autonomously, construct a digital representation of its environment, and provide manual override capabilities without interrupting the mapping process.
+This project addresses that limitation by developing a robotic vehicle capable of collecting environmental information while navigating. The vehicle must be able to operate autonomously, construct a digital representation of its environment, and stream mapping telemetry to a live visualization dashboard.
 
 The system must also be capable of operating within the computational limitations of a microcontroller platform while maintaining reliable performance and real-time responsiveness.
 
@@ -46,7 +44,7 @@ The second objective is to implement environmental scanning using a servo-mounte
 
 The third objective is to develop a digital mapping system capable of recording environmental measurements and constructing a representation of the surrounding environment.
 
-The fourth objective is to create a Bluetooth-enabled manual override system that allows users to control the vehicle while preserving sensor and mapping functionality.
+The fourth objective is to create a real-time telemetry dashboard capable of reading mapping data from the vehicle and visualizing the robot’s movement, scan readings, obstacle points, and estimated environment map.
 
 The fifth objective is to design a modular software architecture that can be expanded with additional sensors, mapping algorithms, and advanced autonomous capabilities in future development phases.
 
@@ -94,30 +92,38 @@ Future iterations of the project may incorporate more advanced mapping technique
 
 # Web Command Center & Telemetry Dashboard
 
-An interactive, dark-themed robotics command center application was developed to interface directly with the vehicle over a serial connection. The dashboard resides in the `dashboard` directory and provides live coordinate mapping, ultrasonic sweeps visualization, analytics tracking, data logger exports, and an interactive manual override keyboard controller.
+An interactive, dark-themed robotics command center application was developed to interface directly with the vehicle over a serial connection. The dashboard resides in the `dashboard` directory and provides live coordinate mapping, ultrasonic sweep visualization, analytics tracking, data logger exports, simulation mode, and real-time occupancy-style map rendering.
 
 ## Data Stream Protocol (Serial Packet Format)
-The vehicle streams mapping telemetry lines over USB serial (at 9600 baud by default) using the following CSV packet protocol:
+
+The vehicle streams mapping telemetry lines over USB serial at 9600 baud using the following CSV packet protocol:
 
 `MAP,step,x,y,heading,scanAngle,distance,state`
 
 ### Field Definitions:
+
 * **`step`**: Sequential mapping event number (integer).
 * **`x`**: Current estimated vehicle X coordinate in centimeters.
 * **`y`**: Current estimated vehicle Y coordinate in centimeters.
-* **`heading`**: Robot's absolute movement direction ($0^\circ$ = East, $90^\circ$ = North, $180^\circ$ = West, $270^\circ$ = South).
+* **`heading`**: Robot's interpreted map-space direction ($0^\circ$ = East, $90^\circ$ = North, $180^\circ$ = West, $270^\circ$ = South).
 * **`scanAngle`**: Current angular direction of the servo ($30^\circ$ to $150^\circ$, where $90^\circ$ points straight ahead).
-* **`distance`**: Current ultrasonic distance sensor reading in centimeters ($-1$ or $400$ indicates no echo).
-* **`state`**: Current active state of the robot's navigation engine (e.g., `FRONT_SCAN`, `FAST_FORWARD`, `OBSTACLE_STOP`, `LEFT_SCAN`, `RIGHT_SCAN`, `TURN_LEFT`, `TURN_RIGHT`, `NO_VALID_PATH`).
+* **`distance`**: Current ultrasonic distance sensor reading in centimeters (`-1` indicates no echo or invalid reading).
+* **`state`**: Current active state of the robot's navigation engine (e.g., `FRONT_SCAN`, `FAST_FORWARD`, `SLOW_FORWARD`, `OBSTACLE_STOP`, `LEFT_SCAN`, `RIGHT_SCAN`, `TURN_LEFT`, `TURN_RIGHT`, `NO_VALID_PATH`).
 
 ## Mapping & Grid Conversion Math
-The dashboard parses the incoming telemetry packets and calculates absolute Cartesian coordinate locations for obstacles. 
+
+The dashboard parses the incoming telemetry packets and calculates absolute Cartesian coordinate locations for obstacles.
+
 * **Absolute Sensor Direction:** The absolute angle of the sensor beam in grid space is:
+
   $$\theta_{\text{sensor}} = \theta_{\text{robot}} + (\theta_{\text{scan}} - 90)$$
+
 * **Obstacle Grid Mapping:** If an obstacle is detected within range ($2\text{cm} < D < 400\text{cm}$), its location $(x_{\text{obs}}, y_{\text{obs}})$ is plotted relative to the robot's position:
+
   $$x_{\text{obs}} = x_{\text{robot}} + D \times \cos\left(\theta_{\text{sensor}} \times \frac{\pi}{180}\right)$$
+
   $$y_{\text{obs}} = y_{\text{robot}} + D \times \sin\left(\theta_{\text{sensor}} \times \frac{\pi}{180}\right)$$
-  
+
 These coordinates are rounded to the nearest integer and added to a de-duplicated occupancy map, matching a robotic vacuum-style mapping algorithm.
 
 ---
@@ -125,18 +131,24 @@ These coordinates are rounded to the nearest integer and added to a de-duplicate
 # How to Use the Dashboard
 
 ## 1. Live Deployment Launch (Recommended / Easiest)
+
 The simplest way to run and connect to the dashboard without installing any dependencies or terminal commands:
+
 1. Open **[autonomous-vehicle-mapping-and-tele-seven.vercel.app](https://autonomous-vehicle-mapping-and-tele-seven.vercel.app/)** in Google Chrome, Microsoft Edge, or Opera.
 2. The dashboard runs directly in your browser. Since it is hosted securely under HTTPS, the **Web Serial API is fully enabled** and ready to connect to your Arduino out of the box.
 
 ## 2. Quick Launch (Offline Simulator Mode)
-If you want to evaluate the dashboard layout, map rendering, and manual override controls offline:
-1. Double-click on **[index.html](file:///c:/Users/User/-autonomous-vehicle-mapping-and-telemetry-system/dashboard/index.html)** in your file explorer.
-2. The page will open directly in your web browser. 
+
+If you want to evaluate the dashboard layout, map rendering, telemetry parsing, and simulation features offline:
+
+1. Open the `dashboard/index.html` file directly from the cloned repository.
+2. The page will open directly in your web browser.
 3. The dashboard defaults to **Simulation Mode**, running a 2D raycasting engine inside a virtual box arena with obstacles. Note: Browsers block Web Serial access on local `file://` URLs, so physical connection is disabled in this mode.
 
 ## 3. Secure Local Server Launch (Alternative Developer Mode)
+
 If you want to run the application locally while maintaining Web Serial connection capability:
+
 1. Open a command prompt or terminal.
 2. Navigate to the dashboard directory:
    ```bash
@@ -150,28 +162,20 @@ If you want to run the application locally while maintaining Web Serial connecti
 4. Open your web browser and navigate to **[http://localhost:3030](http://localhost:3030)**.
 
 ## 4. Connecting to the Vehicle
-1. Unplug the TX and RX pins of any Bluetooth module (like HC-05) from pins 0 and 1 on your Arduino (these conflict with the USB connection).
+
+1. Connect the Arduino Uno to your computer using a USB cable.
 2. Toggle the **SIMULATOR** switch in the top bar of the dashboard to **OFF**.
-3. Choose the **Baud Rate** corresponding to your code (default is 9600).
+3. Choose the **Baud Rate** corresponding to your code. The default is 9600.
 4. Click **Connect Arduino**.
 5. Select the serial port corresponding to your Arduino Uno from the browser popup dialog and click **Connect**.
 
-## 4. Dashboard Features & Controls
-* **Live Telemetry:** Metrics like current coordinates, heading, step count, and vehicle state update in real-time.
-* **Canvas Grid Interaction:** Use the overlay HUD buttons to **Zoom In**, **Zoom Out**, **Center Robot**, **Reset Map**, and **Export Map** (saves a PNG of the map). You can also **click and drag** the canvas to pan, or use your **mouse wheel** to zoom.
+## 5. Dashboard Features & Controls
+
+* **Live Telemetry:** Metrics like current coordinates, heading, step count, distance readings, scan angle, and vehicle state update in real time.
+* **Canvas Grid Interaction:** Use the overlay HUD buttons to **Zoom In**, **Zoom Out**, **Center Robot**, **Reset Map**, and **Export Map**. The map export saves a PNG of the current map. You can also click and drag the canvas to pan, or use your mouse wheel to zoom.
 * **Fading Sonar Radar:** A sweeping line representing the ultrasonic sensor's active scan angle draws a faded trail of sensor blips.
 * **Raw Console Log:** Displays raw telemetry streams. Click **CSV** or **JSON** to download the serial feed history.
-* **Manual Override Controls:** Activate manual override in the controls tab. Drive the robot using the virtual keypad or press **`W`** (Forward), **`A`** (Left), **`S`** (Reverse), **`D`** (Right), and **`Space`** (Halt) on your keyboard.
-
----
-
-# Manual Override and Bluetooth Control
-
-In addition to autonomous operation, the vehicle supports manual control through Bluetooth communication.
-
-The manual override system allows users to directly control vehicle movement while maintaining active sensor monitoring and environmental mapping. This creates a hybrid control architecture in which autonomous perception and data collection continue even while navigation decisions are being made by a human operator.
-
-The Bluetooth interface provides commands for directional movement, speed adjustment, mode switching, and emergency stopping. This functionality enables testing, exploration, and manual navigation without sacrificing environmental awareness.
+* **Simulation Mode:** Allows the dashboard to be tested without the physical Arduino vehicle by generating realistic telemetry packets that match the vehicle's serial output format.
 
 ---
 
@@ -187,7 +191,7 @@ The mapping layer processes environmental measurements and updates the vehicle's
 
 The control layer converts navigation decisions into motor commands, regulating speed, steering, and directional movement.
 
-The communication layer manages Bluetooth connectivity and user interaction.
+The communication layer manages serial telemetry output between the Arduino vehicle and the web-based dashboard.
 
 The safety layer monitors system status and handles fault detection, recovery procedures, and safe-mode operation.
 
@@ -197,11 +201,11 @@ This layered architecture improves maintainability, scalability, and future exte
 
 # Hardware Architecture
 
-The hardware platform consists of an Arduino Uno microcontroller, an L298N motor driver, dual DC drive motors, ultrasonic sensors, servo motors, a Bluetooth communication module, a battery-powered electrical system, and a custom-designed 3D-printed chassis.
+The hardware platform consists of an Arduino Uno microcontroller, an L298N motor driver, dual DC drive motors, an ultrasonic sensor, a servo motor, a battery-powered electrical system, and a custom-designed 3D-printed chassis.
 
 The Arduino serves as the central processing unit, coordinating communication between sensors, actuators, and control algorithms.
 
-The motor driver provides the power amplification required to control the drive motors, while the ultrasonic sensors and servo system provide environmental awareness.
+The motor driver provides the power amplification required to control the drive motors, while the ultrasonic sensor and servo system provide environmental awareness.
 
 The custom chassis provides structural support and enables efficient integration of all hardware components into a compact mobile platform.
 
@@ -213,7 +217,7 @@ The development process involves numerous engineering challenges, including sens
 
 The mapping subsystem introduces additional challenges related to memory management, data storage, and environmental reconstruction. Since the project is built on a microcontroller platform with limited computational resources, efficient algorithms and careful system design are essential.
 
-Balancing autonomous operation with manual override functionality also requires careful coordination between communication systems, navigation logic, and safety mechanisms.
+Maintaining reliable autonomous operation requires careful coordination between sensor readings, motor control, mapping logic, telemetry output, and safety mechanisms.
 
 ---
 
@@ -235,4 +239,4 @@ Adnan Al Haj Ali
 
 Ammar
 
-This project was developed as a collaborative robotics, embedded systems, and autonomous navigation initiative focused on environmental mapping, intelligent decision-making, and hybrid autonomous control systems.
+This project was developed as a collaborative robotics and embedded systems project focused on autonomous navigation, mapping, telemetry visualization, and environmental perception.
