@@ -2,11 +2,11 @@
 
 ## Overview
 
-The Hybrid Autonomous Navigation, Mapping, and Manual Override Vehicle was developed using a combination of commercially available electronics, custom-manufactured components, and rapid prototyping techniques. The objective was to create an affordable robotics platform capable of demonstrating concepts typically found in significantly more expensive autonomous systems, including obstacle avoidance, environmental perception, autonomous navigation, digital mapping, wireless communication, and embedded control systems.
+The Autonomous Vehicle Mapping and Telemetry System was developed using a combination of commercially available electronics, custom-manufactured components, and rapid prototyping techniques. The objective was to create an affordable robotics platform capable of demonstrating autonomous navigation, obstacle avoidance, environmental perception, servo-assisted scanning, digital mapping, telemetry output, and embedded control systems.
 
-A significant portion of the project's hardware originated from the ELEGOO Super Starter Kit for Arduino UNO R3, which provided the foundation for prototyping and development. Additional components were acquired separately to support vehicle mobility, wireless communication, and custom chassis integration.
+A significant portion of the project's hardware originated from the ELEGOO Super Starter Kit for Arduino UNO R3, which provided the foundation for prototyping and development. Additional components were acquired separately to support vehicle mobility, motor control, power delivery, and custom chassis integration.
 
-The following Bill of Materials (BOM) summarizes all major components used throughout the project and their estimated retail value at the time of development.
+The following Bill of Materials (BOM) summarizes the major components used throughout the current autonomous mapping and telemetry version of the project and their estimated retail value at the time of development.
 
 ---
 
@@ -15,21 +15,20 @@ The following Bill of Materials (BOM) summarizes all major components used throu
 | Item                                         | Quantity | Acquisition Method      | Cost (CAD) | Purpose                                                                                                                               |
 | -------------------------------------------- | -------- | ----------------------- | ---------: | ------------------------------------------------------------------------------------------------------------------------------------- |
 | ELEGOO Super Starter Kit for Arduino UNO R3  | 1        | Purchased               |     $49.99 | Primary development kit containing Arduino Uno, ultrasonic sensors, servo motor, breadboard, jumper wires, and supporting electronics |
-| Arduino Uno R3                               | 1        | Included in Starter Kit |   Included | Main embedded controller responsible for sensor processing, navigation logic, and motor control                                       |
-| HC-SR04 Ultrasonic Sensors                   | 2        | Included in Starter Kit |   Included | Environmental perception, obstacle detection, and mapping measurements                                                                |
-| SG90 Servo Motor                             | 1        | Included in Starter Kit |   Included | Rotates ultrasonic sensor to perform directional scanning                                                                             |
+| Arduino Uno R3                               | 1        | Included in Starter Kit |   Included | Main embedded controller responsible for sensor processing, autonomous navigation logic, motor control, and telemetry output          |
+| HC-SR04 Ultrasonic Sensor                    | 1        | Included in Starter Kit |   Included | Environmental perception, obstacle detection, distance measurement, and mapping data collection                                       |
+| SG90 Servo Motor                             | 1        | Included in Starter Kit |   Included | Rotates the ultrasonic sensor to perform left, center, and right environmental scanning                                                |
 | Breadboard                                   | 1        | Included in Starter Kit |   Included | Circuit prototyping and testing                                                                                                       |
 | Jumper Wire Set                              | 1        | Included in Starter Kit |   Included | Electrical interconnections between hardware components                                                                               |
 | L298N Motor Driver Module                    | 1        | Purchased               |      $5.99 | Controls motor direction, speed, and power delivery                                                                                   |
 | DC Gear Motors                               | 2        | Purchased               |     $12.00 | Vehicle propulsion and differential steering                                                                                          |
 | Wheels                                       | 2        | Purchased               |      $5.00 | Mechanical mobility system                                                                                                            |
-| Bluetooth Module (HC-05)                     | 1        | Purchased               |      $8.99 | Wireless communication and manual override functionality                                                                              |
-| Battery Holder and Power Distribution System | 1        | Purchased               |      $5.00 | Electrical power management                                                                                                           |
-| AA Batteries                                 | 6        | Purchased               |      $6.00 | Primary power source                                                                                                                  |
+| Battery Holder and Power Distribution System | 1        | Purchased               |      $5.00 | Electrical power management for the vehicle platform                                                                                  |
+| AA Batteries                                 | 6        | Purchased               |      $6.00 | Primary power source for the mobile platform                                                                                          |
 | Custom 3D Printed Chassis                    | 1        | Self-Manufactured       |     $10.00 | Structural platform for all electronics and mechanical systems                                                                        |
 | Servo Sensor Mount                           | 1        | Self-Manufactured       |      $2.00 | Mounting bracket for ultrasonic scanning assembly                                                                                     |
 | Fasteners, Spacers, and Mounting Hardware    | 1 Set    | Purchased               |      $3.00 | Mechanical assembly and component mounting                                                                                            |
-| USB Programming Cable                        | 1        | Existing Equipment      |   Included | Programming and debugging interface                                                                                                   |
+| USB Programming and Telemetry Cable          | 1        | Existing Equipment      |   Included | Programming interface and live serial telemetry connection to the web dashboard                                                       |
 
 ---
 
@@ -46,8 +45,8 @@ https://www.amazon.ca/dp/B01D8KOZF4
 The kit provided:
 
 * Arduino Uno R3
-* Ultrasonic Sensors
-* Servo Motors
+* HC-SR04 Ultrasonic Sensors
+* SG90 Servo Motor
 * Breadboard
 * Jumper Wires
 * LEDs
@@ -62,15 +61,14 @@ This significantly reduced the cost of development while providing a flexible pl
 
 ## Cost Summary
 
-| Category                              |  Cost (CAD) |
+| Category                              | Cost (CAD)  |
 | ------------------------------------- | ----------: |
-| Development Platform and Electronics  |      $55.98 |
+| Development Platform and Electronics  |      $49.99 |
 | Motion Control Components             |      $17.00 |
-| Wireless Communication Components     |       $8.99 |
 | Power System Components               |      $11.00 |
 | Mechanical Components and Fabrication |      $12.00 |
 | Assembly Hardware                     |       $3.00 |
-| **Total Estimated Project Cost**      | **$107.97** |
+| **Total Estimated Project Cost**      |  **$92.99** |
 
 ---
 
@@ -78,9 +76,9 @@ This significantly reduced the cost of development while providing a flexible pl
 
 One of the primary design goals of this project was to maximize technical capability while maintaining a modest development budget. Rather than relying on specialized robotics hardware, the project utilizes readily available consumer-grade electronics and custom-manufactured components to achieve functionality typically associated with more advanced autonomous robotic platforms.
 
-Despite a total estimated hardware cost of approximately **$108 CAD**, the platform demonstrates a wide range of engineering concepts including autonomous navigation, obstacle avoidance, environmental scanning, digital mapping, Bluetooth communication, embedded systems development, real-time decision making, and robotics control systems.
+The current autonomous mapping and telemetry version of the platform has an estimated hardware cost of approximately **$93 CAD**. Despite the low cost, the system demonstrates a wide range of engineering concepts including autonomous navigation, obstacle avoidance, servo-assisted environmental scanning, digital mapping, serial telemetry, embedded systems development, real-time decision making, and robotics control systems.
 
-The modular nature of the platform also allows future upgrades to be implemented without requiring significant redesign. Additional sensors, mapping technologies, localization systems, and advanced navigation algorithms can be integrated using the existing architecture.
+The modular nature of the platform also allows future upgrades to be implemented without requiring significant redesign. Additional sensors, mapping technologies, localization systems, wheel encoders, and advanced navigation algorithms can be integrated using the existing architecture.
 
 ---
 
@@ -93,7 +91,7 @@ While the financial cost of the project remains relatively low, the technical co
 * Autonomous Navigation
 * Environmental Mapping
 * Sensor Integration
-* Wireless Communication
+* Serial Telemetry and Data Visualization
 * Control Systems Design
 * Real-Time Software Development
 * Hardware and Software Integration
@@ -113,5 +111,5 @@ Adnan Al Haj Ali
 
 Ammar
 
-Hybrid Autonomous Navigation, Mapping, and Manual Override Vehicle
+Autonomous Vehicle Mapping and Telemetry System
 2026
