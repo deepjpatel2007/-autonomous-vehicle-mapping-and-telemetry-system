@@ -90,6 +90,74 @@ Future iterations of the project may incorporate more advanced mapping technique
 
 ---
 
+# Web Command Center & Telemetry Dashboard
+
+An interactive, dark-themed robotics command center application was developed to interface directly with the vehicle over a serial connection. The dashboard resides in the `dashboard` directory and provides live coordinate mapping, ultrasonic sweeps visualization, analytics tracking, data logger exports, and an interactive manual override keyboard controller.
+
+## Data Stream Protocol (Serial Packet Format)
+The vehicle streams mapping telemetry lines over USB serial (at 9600 baud by default) using the following CSV packet protocol:
+
+`MAP,step,x,y,heading,scanAngle,distance,state`
+
+### Field Definitions:
+* **`step`**: Sequential mapping event number (integer).
+* **`x`**: Current estimated vehicle X coordinate in centimeters.
+* **`y`**: Current estimated vehicle Y coordinate in centimeters.
+* **`heading`**: Robot's absolute movement direction ($0^\circ$ = East, $90^\circ$ = North, $180^\circ$ = West, $270^\circ$ = South).
+* **`scanAngle`**: Current angular direction of the servo ($30^\circ$ to $150^\circ$, where $90^\circ$ points straight ahead).
+* **`distance`**: Current ultrasonic distance sensor reading in centimeters ($-1$ or $400$ indicates no echo).
+* **`state`**: Current active state of the robot's navigation engine (e.g., `FRONT_SCAN`, `FAST_FORWARD`, `OBSTACLE_STOP`, `LEFT_SCAN`, `RIGHT_SCAN`, `TURN_LEFT`, `TURN_RIGHT`, `NO_VALID_PATH`).
+
+## Mapping & Grid Conversion Math
+The dashboard parses the incoming telemetry packets and calculates absolute Cartesian coordinate locations for obstacles. 
+* **Absolute Sensor Direction:** The absolute angle of the sensor beam in grid space is:
+  $$\theta_{\text{sensor}} = \theta_{\text{robot}} + (\theta_{\text{scan}} - 90)$$
+* **Obstacle Grid Mapping:** If an obstacle is detected within range ($2\text{cm} < D < 400\text{cm}$), its location $(x_{\text{obs}}, y_{\text{obs}})$ is plotted relative to the robot's position:
+  $$x_{\text{obs}} = x_{\text{robot}} + D \times \cos\left(\theta_{\text{sensor}} \times \frac{\pi}{180}\right)$$
+  $$y_{\text{obs}} = y_{\text{robot}} + D \times \sin\left(\theta_{\text{sensor}} \times \frac{\pi}{180}\right)$$
+  
+These coordinates are rounded to the nearest integer and added to a de-duplicated occupancy map, matching a robotic vacuum-style mapping algorithm.
+
+---
+
+# How to Use the Dashboard
+
+## 1. Quick Launch (Offline Simulator Mode)
+If you want to evaluate the dashboard layout, map rendering, and manual override controls without a physical Arduino:
+1. Double-click on **[index.html](file:///c:/Users/User/-autonomous-vehicle-mapping-and-telemetry-system/dashboard/index.html)** in your file explorer.
+2. The page will open directly in your web browser. 
+3. The dashboard defaults to **Simulation Mode**, running a 2D raycasting engine inside a virtual box arena with obstacles. The path history (green line), robot (blue triangle), and obstacles (red markers) will render and update dynamically.
+
+## 2. Secure Local Server Launch (Required for Physical Arduino Connection)
+To query physical serial ports using the **Web Serial API**, web browsers enforce a secure origin policy. The page must be served from `http://localhost`:
+1. Open a command prompt or terminal.
+2. Navigate to the dashboard directory:
+   ```bash
+   cd dashboard
+   ```
+3. Run the local static server using Node:
+   ```bash
+   npx serve .
+   ```
+   *(If script execution permissions are restricted on Windows, use `cmd /c "set PATH=C:\Program Files\nodejs;%PATH% && npx serve -l 3030 ."`)*
+4. Open your web browser and navigate to **[http://localhost:3030](http://localhost:3030)** (or the port indicated in your console).
+
+## 3. Connecting to the Vehicle
+1. Unplug the TX and RX pins of any Bluetooth module (like HC-05) from pins 0 and 1 on your Arduino (these conflict with the USB connection).
+2. Toggle the **SIMULATOR** switch in the top bar of the dashboard to **OFF**.
+3. Choose the **Baud Rate** corresponding to your code (default is 9600).
+4. Click **Connect Arduino**.
+5. Select the serial port corresponding to your Arduino Uno from the browser popup dialog and click **Connect**.
+
+## 4. Dashboard Features & Controls
+* **Live Telemetry:** Metrics like current coordinates, heading, step count, and vehicle state update in real-time.
+* **Canvas Grid Interaction:** Use the overlay HUD buttons to **Zoom In**, **Zoom Out**, **Center Robot**, **Reset Map**, and **Export Map** (saves a PNG of the map). You can also **click and drag** the canvas to pan, or use your **mouse wheel** to zoom.
+* **Fading Sonar Radar:** A sweeping line representing the ultrasonic sensor's active scan angle draws a faded trail of sensor blips.
+* **Raw Console Log:** Displays raw telemetry streams. Click **CSV** or **JSON** to download the serial feed history.
+* **Manual Override Controls:** Activate manual override in the controls tab. Drive the robot using the virtual keypad or press **`W`** (Forward), **`A`** (Left), **`S`** (Reverse), **`D`** (Right), and **`Space`** (Halt) on your keyboard.
+
+---
+
 # Manual Override and Bluetooth Control
 
 In addition to autonomous operation, the vehicle supports manual control through Bluetooth communication.
