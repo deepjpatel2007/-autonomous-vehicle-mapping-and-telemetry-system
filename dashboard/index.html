@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Vehicle Mapping Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Outfit font for professional UI and JetBrains Mono for telemetry readouts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons for premium visual styling -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Top Navigation Bar -->
+        <header class="header">
+            <div class="brand">
+                <div class="brand-icon-wrapper">
+                    <i data-lucide="navigation" class="brand-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>AUTONOMOUS VEHICLE MAPPING SYSTEM</h1>
+                    <span class="sub-title">Live Robotics Command & Telemetry Center</span>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <!-- Simulation Control -->
+                <div class="sim-control-group">
+                    <span class="sim-label">SIMULATOR</span>
+                    <label class="switch" title="Toggle Simulation Mode (useful when no physical Arduino is connected)">
+                        <input type="checkbox" id="simModeToggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <!-- Connection Widget -->
+                <div class="connection-widget">
+                    <div class="baud-selector-wrapper">
+                        <label for="baudRateSelect">Baud:</label>
+                        <select id="baudRateSelect">
+                            <option value="9600" selected>9600</option>
+                            <option value="115200">115200</option>
+                        </select>
+                    </div>
+                    <button id="connectBtn" class="btn btn-connect">
+                        <i data-lucide="cpu" class="btn-icon"></i>
+                        <span id="connectBtnText">Connect Arduino</span>
+                    </button>
+                    <div id="connStatusIndicator" class="status-indicator status-disconnected">
+                        <span class="status-dot"></span>
+                        <span id="connStatusText" class="status-text">Disconnected</span>
+                    </div>
+                </div>
+
+                <!-- System Stats -->
+                <div class="system-stats">
+                    <div class="stat-group">
+                        <span class="stat-label">UPTIME</span>
+                        <span id="systemUptimeText" class="stat-value font-mono">00:00:00</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">LOCAL TIME</span>
+                        <span id="currentTimestampText" class="stat-value font-mono">12:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Column: Telemetry & Movement Status -->
+            <section class="grid-panel panel-left">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i data-lucide="activity" class="panel-header-icon"></i>
+                        <h2>Live Telemetry</h2>
+                    </div>
+                    <span class="pulse-indicator"></span>
+                </div>
+                
+                <!-- Telemetry Cards Grid -->
+                <div class="telemetry-grid">
+                    <div class="telemetry-card" id="card-x">
+                        <span class="card-label">POSITION X</span>
+                        <div class="card-value-wrapper">
+                            <span id="telX" class="card-value font-mono">0</span>
+                            <span class="card-unit">cm</span>
+                        </div>
+                    </div>
+                    <div class="telemetry-card" id="card-y">
+                        <span class="card-label">POSITION Y</span>
+                        <div class="card-value-wrapper">
+                            <span id="telY" class="card-value font-mono">0</span>
+                            <span class="card-unit">cm</span>
+                        </div>
+                    </div>
+                    <div class="telemetry-card" id="card-heading">
+                        <span class="card-label">HEADING</span>
+                        <div class="card-value-wrapper">
+                            <span id="telHeading" class="card-value font-mono">0</span>
+                            <span class="card-unit">°</span>
+                        </div>
+                    </div>
+                    <div class="telemetry-card" id="card-distance">
+                        <span class="card-label">OBSTACLE DIST</span>
+                        <div class="card-value-wrapper">
+                            <span id="telDistance" class="card-value font-mono">--</span>
+                            <span class="card-unit">cm</span>
+                        </div>
+                    </div>
+                    <div class="telemetry-card" id="card-scan-angle">
+                        <span class="card-label">SCAN ANGLE</span>
+                        <div class="card-value-wrapper">
+                            <span id="telScanAngle" class="card-value font-mono">0</span>
+                            <span class="card-unit">°</span>
+                        </div>
+                    </div>
+                    <div class="telemetry-card" id="card-step">
+                        <span class="card-label">MAPPING STEP</span>
+                        <div class="card-value-wrapper">
+                            <span id="telStep" class="card-value font-mono">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- State Indicator Panel -->
+                <div class="state-card" id="card-state">
+                    <span class="state-label">CURRENT VEHICLE STATE</span>
+                    <div id="telState" class="state-value">IDLE</div>
+                    <div class="state-bar-outer">
+                        <div id="stateIndicatorBar" class="state-bar-inner"></div>
+                    </div>
+                </div>
+
+                <!-- Movement & Navigation Details -->
+                <div class="navigation-details">
+                    <h3 class="section-subheading">Navigation Decision Info</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Current Direction:</span>
+                        <span id="navDirection" class="detail-value font-mono">NORTH (0°)</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Movement State:</span>
+                        <span id="navMovement" class="detail-value font-mono">STOPPED</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Min. Obstacle Dist:</span>
+                        <span id="navMinObstacle" class="detail-value font-mono">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Last Turn Direction:</span>
+                        <span id="navLastTurn" class="detail-value font-mono">NONE</span>
+                    </div>
+                </div>
+
+                <!-- Action Timeline Log -->
+                <div class="action-timeline-wrapper">
+                    <h3 class="section-subheading">Action & Navigation Timeline</h3>
+                    <div class="timeline-container" id="timelineList">
+                        <!-- Filled by JS -->
+                        <div class="timeline-empty">Waiting for telemetry...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Middle Column: Real-Time Occupancy Map (Canvas) -->
+            <section class="grid-panel panel-center">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i data-lucide="map" class="panel-header-icon"></i>
+                        <h2>Real-Time Occupancy Map</h2>
+                    </div>
+                    <div class="legend-badges">
+                        <span class="legend-badge badge-robot"><span class="dot"></span>Robot</span>
+                        <span class="legend-badge badge-obstacle"><span class="dot"></span>Obstacle</span>
+                        <span class="legend-badge badge-path"><span class="dot"></span>Path</span>
+                        <span class="legend-badge badge-scan"><span class="dot"></span>Scan Beam</span>
+                    </div>
+                </div>
+
+                <!-- Map Canvas Container -->
+                <div class="map-viewport">
+                    <canvas id="occupancyMapCanvas"></canvas>
+                    
+                    <!-- Map Canvas HUD Overlay -->
+                    <div class="canvas-hud shadow-overlay">
+                        <div class="hud-left">
+                            <span class="hud-stat">GRID SCALE: <span class="font-mono">1 grid = 20cm</span></span>
+                            <span class="hud-stat">ZOOM: <span id="zoomScaleText" class="font-mono">1.0x</span></span>
+                        </div>
+                        <div class="hud-right">
+                            <span class="hud-stat">OBSTACLES PLOTTED: <span id="obstacleCountText" class="font-mono">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Map Overlay Controls -->
+                    <div class="map-controls">
+                        <button id="zoomInBtn" class="map-ctrl-btn" title="Zoom In">
+                            <i data-lucide="zoom-in"></i>
+                        </button>
+                        <button id="zoomOutBtn" class="map-ctrl-btn" title="Zoom Out">
+                            <i data-lucide="zoom-out"></i>
+                        </button>
+                        <button id="centerRobotBtn" class="map-ctrl-btn" title="Center on Robot">
+                            <i data-lucide="locate-fixed"></i>
+                        </button>
+                        <button id="resetMapBtn" class="map-ctrl-btn" title="Reset Map & History">
+                            <i data-lucide="rotate-ccw"></i>
+                        </button>
+                        <button id="exportMapBtn" class="map-ctrl-btn btn-export-map" title="Export Map to PNG">
+                            <i data-lucide="download"></i>
+                            <span>Export Map</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Sensor Sweep & System Controls -->
+            <section class="grid-panel panel-right">
+                <!-- Radar Panel -->
+                <div class="radar-panel-wrapper">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i data-lucide="radial" class="panel-header-icon"></i>
+                            <h2>Ultrasonic Sensor Sweep</h2>
+                        </div>
+                    </div>
+                    <div class="radar-viewport">
+                        <canvas id="radarCanvas"></canvas>
+                        <!-- Radar overlays -->
+                        <div class="radar-specs">
+                            <div class="spec-col">
+                                <span class="spec-label">SWEEP RANGE</span>
+                                <span class="spec-value font-mono">0° - 180°</span>
+                            </div>
+                            <div class="spec-col text-right">
+                                <span class="spec-label">SENSOR RANGE</span>
+                                <span class="spec-value font-mono">400 cm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Future Expansion & Interactive Manual Override -->
+                <div class="expansion-panel-wrapper">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i data-lucide="terminal" class="panel-header-icon"></i>
+                            <h2>Manual Control & Expansions</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="expansion-tabs">
+                        <button id="tabManualBtn" class="tab-btn active" onclick="switchExpansionTab('manual')">Manual Control</button>
+                        <button id="tabSystemsBtn" class="tab-btn" onclick="switchExpansionTab('systems')">Modular Integrations</button>
+                    </div>
+
+                    <!-- Tab Content: Manual Override -->
+                    <div id="tabContentManual" class="tab-content active">
+                        <div class="manual-override-container">
+                            <div class="override-header">
+                                <span class="override-status-label">MANUAL OVERRIDE STATE:</span>
+                                <span id="manualOverrideStatus" class="override-status inactive">INACTIVE</span>
+                            </div>
+                            <p class="override-desc">Toggle override to send directional commands back to the vehicle over serial. Keyboard controls are enabled when active.</p>
+                            
+                            <div class="override-toggle-row">
+                                <button id="toggleManualOverrideBtn" class="btn btn-secondary btn-full">
+                                    <i data-lucide="toggle-left" class="btn-icon"></i>
+                                    <span>Activate Manual Controls</span>
+                                </button>
+                            </div>
+
+                            <div class="keypad-layout">
+                                <div></div>
+                                <button id="btnDriveForward" class="keypad-btn" title="Drive Forward (W)">
+                                    <i data-lucide="arrow-up"></i>
+                                </button>
+                                <div></div>
+                                <button id="btnDriveLeft" class="keypad-btn" title="Turn Left (A)">
+                                    <i data-lucide="arrow-left"></i>
+                                </button>
+                                <button id="btnDriveStop" class="keypad-btn stop-btn" title="Emergency Stop (Space)">
+                                    <i data-lucide="square"></i>
+                                </button>
+                                <button id="btnDriveRight" class="keypad-btn" title="Turn Right (D)">
+                                    <i data-lucide="arrow-right"></i>
+                                </button>
+                                <div></div>
+                                <button id="btnDriveBackward" class="keypad-btn" title="Reverse (S)">
+                                    <i data-lucide="arrow-down"></i>
+                                </button>
+                                <div></div>
+                            </div>
+                            <div class="keyboard-legend">
+                                Key bindings: <kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> drives, <kbd>Space</kbd> halts.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Future Modular Expansions -->
+                    <div id="tabContentSystems" class="tab-content">
+                        <div class="modules-grid">
+                            <div class="module-card status-planned">
+                                <div class="module-header">
+                                    <i data-lucide="bluetooth" class="module-icon"></i>
+                                    <span class="module-status">PLANNED</span>
+                                </div>
+                                <span class="module-name">Bluetooth Telemetry</span>
+                            </div>
+                            <div class="module-card status-planned">
+                                <div class="module-header">
+                                    <i data-lucide="disc" class="module-icon"></i>
+                                    <span class="module-status">PLANNED</span>
+                                </div>
+                                <span class="module-name">Wheel Encoder Odometry</span>
+                            </div>
+                            <div class="module-card status-planned">
+                                <div class="module-header">
+                                    <i data-lucide="network" class="module-icon"></i>
+                                    <span class="module-status">PLANNED</span>
+                                </div>
+                                <span class="module-name">SLAM Algorithm Integration</span>
+                            </div>
+                            <div class="module-card status-planned">
+                                <div class="module-header">
+                                    <i data-lucide="video" class="module-icon"></i>
+                                    <span class="module-status">PLANNED</span>
+                                </div>
+                                <span class="module-name">Computer Vision Camera</span>
+                            </div>
+                            <div class="module-card status-planned">
+                                <div class="module-header">
+                                    <i data-lucide="radar" class="module-icon"></i>
+                                    <span class="module-status">PLANNED</span>
+                                </div>
+                                <span class="module-name">2D LiDAR Mapping</span>
+                            </div>
+                            <div class="module-card status-planned">
+                                <div class="module-header">
+                                    <i data-lucide="map-pin" class="module-icon"></i>
+                                    <span class="module-status">PLANNED</span>
+                                </div>
+                                <span class="module-name">GPS Path Tracking</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Row Grid: Analytics & Data Console Logs -->
+        <footer class="dashboard-footer">
+            <!-- Analytics panel -->
+            <section class="grid-panel panel-analytics">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i data-lucide="bar-chart-3" class="panel-header-icon"></i>
+                        <h2>Command Center Analytics</h2>
+                    </div>
+                </div>
+                
+                <div class="analytics-metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Total Mapping Steps</span>
+                        <span id="metricSteps" class="metric-value font-mono">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Est. Distance Traveled</span>
+                        <span id="metricDistance" class="metric-value font-mono">0 cm</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Obstacles Mapped</span>
+                        <span id="metricObstacles" class="metric-value font-mono">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Left Turns Executed</span>
+                        <span id="metricLeftTurns" class="metric-value font-mono">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Right Turns Executed</span>
+                        <span id="metricRightTurns" class="metric-value font-mono">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Avg. Distance Reading</span>
+                        <span id="metricAvgDistance" class="metric-value font-mono">--</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Max. Obstacle Distance</span>
+                        <span id="metricMaxDistance" class="metric-value font-mono">--</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Min. Obstacle Distance</span>
+                        <span id="metricMinDistance" class="metric-value font-mono">--</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Console log panel -->
+            <section class="grid-panel panel-logger">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i data-lucide="terminal" class="panel-header-icon"></i>
+                        <h2>Raw Telemetry Stream Console</h2>
+                    </div>
+                    <div class="logger-actions">
+                        <button id="pauseLogBtn" class="btn-logger" title="Pause / Resume logging feed">
+                            <i data-lucide="pause" class="btn-icon"></i>
+                            <span id="pauseLogBtnText">Pause</span>
+                        </button>
+                        <button id="clearLogBtn" class="btn-logger" title="Clear console records">
+                            <i data-lucide="trash-2" class="btn-icon"></i>
+                            <span>Clear</span>
+                        </button>
+                        <button id="exportCsvBtn" class="btn-logger" title="Export logs as CSV">
+                            <i data-lucide="table" class="btn-icon"></i>
+                            <span>CSV</span>
+                        </button>
+                        <button id="exportJsonBtn" class="btn-logger" title="Export logs as JSON">
+                            <i data-lucide="file-json" class="btn-icon"></i>
+                            <span>JSON</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="console-viewport" id="consoleViewport">
+                    <div class="console-header-line">
+                        [TIMESTAMP] STREAM PACKET DATA
+                    </div>
+                    <div class="console-body" id="consoleBody">
+                        <!-- Injected live logs -->
+                        <div class="console-line system-notice">Console initialized. Awaiting connection or enabling Simulation Mode...</div>
+                    </div>
+                </div>
+            </section>
+        </footer>
+    </div>
+
+    <!-- Core Logic Implementation -->
+    <script src="app.js"></script>
+</body>
+</html>
