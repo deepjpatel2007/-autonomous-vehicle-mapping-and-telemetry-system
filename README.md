@@ -13,6 +13,15 @@ While the vehicle navigates, it streams structured telemetry data over USB seria
 This project demonstrates practical skills in embedded systems, robotics engineering, autonomous navigation, sensor processing, hardware-software integration, telemetry systems, and web-based data visualization.
 
 ---
+## Device Images
+
+Below are images of the autonomous mapping vehicle, including the physical build, sensor setup, wiring, and testing process.
+<img width="672" height="896" alt="image" src="https://github.com/user-attachments/assets/41390316-c1f2-4c2d-b0ba-11f56f7b7fc3" />
+<img width="672" height="896" alt="image" src="https://github.com/user-attachments/assets/f4fabea6-c6f2-4112-bb60-6b66a7c9afdf" />
+<img width="672" height="896" alt="image" src="https://github.com/user-attachments/assets/f6569b45-1f08-4b97-94f6-2d41650f0c2a" />
+<img width="1195" height="896" alt="image" src="https://github.com/user-attachments/assets/fa7b63c1-8bff-4a7f-a8c1-eb7dd290e3cc" />
+
+---
 
 ## Final Project Features
 
